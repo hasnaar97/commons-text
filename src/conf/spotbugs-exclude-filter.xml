@@ -33,12 +33,6 @@
   </Match>
 
   <Match>
-    <Class name="org.apache.commons.text.StrTokenizer" />
-    <Method name="clone" />
-    <Bug code="CN" />
-  </Match>
-
-  <Match>
     <Class name="org.apache.commons.text.StringTokenizer" />
     <Method name="clone" />
     <Bug code="CN" />
@@ -57,9 +51,4 @@
     <Method name="lookup" />
     <Bug pattern="DCN_NULLPOINTER_EXCEPTION" />
   </Match>
-  <!-- https://github.com/spotbugs/spotbugs/issues/2710 -->
-  <Match>
-    <Class name="~.*" />
-    <Bug pattern="CT_CONSTRUCTOR_THROW" />
-  </Match>  
 </FindBugsFilter>
