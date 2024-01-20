@@ -106,7 +106,7 @@ public class IntersectionSimilarity<T> implements SimilarityScore<IntersectionRe
         }
 
         /**
-         * Gets the number of unique elements in the bag.
+         * Get the number of unique elements in the bag.
          *
          * @return The unique element size
          */
@@ -128,7 +128,7 @@ public class IntersectionSimilarity<T> implements SimilarityScore<IntersectionRe
         int intersection = 0;
         for (final T element : setA) {
             if (setB.contains(element)) {
-                intersection++;
+                ++intersection;
             }
         }
         return intersection;

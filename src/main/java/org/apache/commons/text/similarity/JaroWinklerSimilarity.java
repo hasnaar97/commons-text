@@ -31,8 +31,8 @@ import org.apache.commons.lang3.StringUtils;
  *
  * <p>
  * This implementation is based on the Jaro Winkler similarity algorithm
- * from <a href="https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance">
- * https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance</a>.
+ * from <a href="http://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance">
+ * http://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance</a>.
  * </p>
  *
  * <p>
@@ -70,43 +70,47 @@ public class JaroWinklerSimilarity implements SimilarityScore<Double> {
         Arrays.fill(matchIndexes, -1);
         final boolean[] matchFlags = new boolean[max.length()];
         int matches = 0;
-        for (int mi = 0; mi < min.length(); mi++) {
+        final int minLength = min.length();
+        final int maxLength = max.length();
+        for (int mi = 0; mi < minLength; ++mi) {
             final char c1 = min.charAt(mi);
-            for (int xi = Math.max(mi - range, 0), xn = Math.min(mi + range + 1, max.length()); xi < xn; xi++) {
+            final int mathMax = Math.max(mi - range, 0);
+            final int mathMin = Math.min(mi + range + 1, maxLength);
+            for (int xi = mathMax, xn = mathMin; xi < xn; ++xi) {
                 if (!matchFlags[xi] && c1 == max.charAt(xi)) {
                     matchIndexes[mi] = xi;
                     matchFlags[xi] = true;
-                    matches++;
+                    ++matches;
                     break;
                 }
             }
         }
         final char[] ms1 = new char[matches];
         final char[] ms2 = new char[matches];
-        for (int i = 0, si = 0; i < min.length(); i++) {
+        for (int i = 0, si = 0; i < minLength; ++i) {
             if (matchIndexes[i] != -1) {
                 ms1[si] = min.charAt(i);
-                si++;
+                ++si;
             }
         }
-        for (int i = 0, si = 0; i < max.length(); i++) {
+        for (int i = 0, si = 0; i < maxLength; ++i) {
             if (matchFlags[i]) {
                 ms2[si] = max.charAt(i);
-                si++;
+                ++si;
             }
         }
         int halfTranspositions = 0;
-        for (int mi = 0; mi < ms1.length; mi++) {
+        for (int mi = 0; mi < ms1.length; ++mi) {
             if (ms1[mi] != ms2[mi]) {
-                halfTranspositions++;
+                ++halfTranspositions;
             }
         }
         int prefix = 0;
-        for (int mi = 0; mi < Math.min(4, min.length()); mi++) {
+        for (int mi = 0; mi < Math.min(4, minLength); ++mi) {
             if (first.charAt(mi) != second.charAt(mi)) {
                 break;
             }
-            prefix++;
+            ++prefix;
         }
         return new int[] {matches, halfTranspositions, prefix};
     }

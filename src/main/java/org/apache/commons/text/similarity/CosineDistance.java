@@ -27,7 +27,7 @@ import java.util.Map;
  *
  * <p>
  * For further explanation about Cosine Similarity and Cosine Distance, refer to
- * https://en.wikipedia.org/wiki/Cosine_similarity.
+ * http://en.wikipedia.org/wiki/Cosine_similarity.
  * </p>
  *
  * @since 1.0
@@ -37,8 +37,8 @@ public class CosineDistance implements EditDistance<Double> {
 
     @Override
     public Double apply(final CharSequence left, final CharSequence right) {
-        final CharSequence[] leftTokens = RegexTokenizer.INSTANCE.apply(left);
-        final CharSequence[] rightTokens = RegexTokenizer.INSTANCE.apply(right);
+        final CharSequence[] leftTokens = RegexTokenizer.INSTANCE.tokenize(left);
+        final CharSequence[] rightTokens = RegexTokenizer.INSTANCE.tokenize(right);
 
         final Map<CharSequence, Integer> leftVector = Counter.of(leftTokens);
         final Map<CharSequence, Integer> rightVector = Counter.of(rightTokens);

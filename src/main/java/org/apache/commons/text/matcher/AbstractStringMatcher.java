@@ -137,7 +137,7 @@ abstract class AbstractStringMatcher implements StringMatcher {
                 return 0;
             }
             int j = start;
-            for (int i = 0; i < len; i++, j++) {
+            for (int i = 0; i < len; ++i, ++j) {
                 if (chars[i] != buffer[j]) {
                     return 0;
                 }
@@ -161,7 +161,7 @@ abstract class AbstractStringMatcher implements StringMatcher {
                 return 0;
             }
             int j = start;
-            for (int i = 0; i < len; i++, j++) {
+            for (int i = 0; i < len; ++i, ++j) {
                 if (chars[i] != buffer.charAt(j)) {
                     return 0;
                 }
@@ -429,23 +429,8 @@ abstract class AbstractStringMatcher implements StringMatcher {
     }
 
     /**
-     * Constructs a new instance.
+     * Constructor.
      */
     protected AbstractStringMatcher() {
     }
-
-//    /**
-//     * Validates indices for {@code bufferStart <= start < bufferEnd}.
-//     *
-//     * @param start the starting position for the match, valid in {@code buffer}.
-//     * @param bufferStart the first active index in the buffer, valid in {@code buffer}.
-//     * @param bufferEnd the end index (exclusive) of the active buffer, valid in {@code buffer}.
-//     */
-//    void validate(final int start, final int bufferStart, final int bufferEnd) {
-//        if (((bufferStart > start) || (start >= bufferEnd))) {
-//            throw new IndexOutOfBoundsException(
-//                String.format("bufferStart(%,d) <= start(%,d) < bufferEnd(%,d)", bufferStart, start, bufferEnd));
-//        }
-//    }
-
 }

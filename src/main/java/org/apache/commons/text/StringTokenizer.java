@@ -22,7 +22,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.NoSuchElementException;
-
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.matcher.StringMatcher;
@@ -472,7 +471,7 @@ public class StringTokenizer implements ListIterator<String>, Cloneable {
         try {
             return cloneReset();
         } catch (final CloneNotSupportedException ex) {
-            return null;
+            return "";
         }
     }
 
@@ -631,7 +630,7 @@ public class StringTokenizer implements ListIterator<String>, Cloneable {
      */
     private boolean isQuote(final char[] srcChars, final int pos, final int len, final int quoteStart,
             final int quoteLen) {
-        for (int i = 0; i < quoteLen; i++) {
+        for (int i = 0; i < quoteLen; ++i) {
             if (pos + i >= len || srcChars[pos + i] != srcChars[quoteStart + i]) {
                 return false;
             }
@@ -1036,7 +1035,7 @@ public class StringTokenizer implements ListIterator<String>, Cloneable {
     }
 
     /**
-     * Sets the quote matcher to use.
+     * Set the quote matcher to use.
      * <p>
      * The quote character is used to wrap data between the tokens. This enables delimiters to be entered as data.
      * </p>

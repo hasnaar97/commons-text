@@ -43,32 +43,32 @@ final class ParsedDecimal {
     interface FormatOptions {
 
         /**
-         * Gets the decimal separator character.
+         * Get the decimal separator character.
          * @return decimal separator character
          */
         char getDecimalSeparator();
 
         /**
-         * Gets an array containing the localized digit characters 0-9 in that order.
+         * Get an array containing the localized digit characters 0-9 in that order.
          * This string <em>must</em> be non-null and have a length of 10.
          * @return array containing the digit characters 0-9
          */
         char[] getDigits();
 
         /**
-         * Gets the exponent separator as an array of characters.
+         * Get the exponent separator as an array of characters.
          * @return exponent separator as an array of characters
          */
         char[] getExponentSeparatorChars();
 
         /**
-         * Gets the character used to separate thousands groupings.
+         * Get the character used to separate thousands groupings.
          * @return character used to separate thousands groupings
          */
         char getGroupingSeparator();
 
         /**
-         * Gets the minus sign character.
+         * Get the minus sign character.
          * @return minus sign character
          */
         char getMinusSign();
@@ -271,8 +271,8 @@ final class ParsedDecimal {
      * @param chars characters to append
      */
     private void append(final char[] chars) {
-        for (final char c : chars) {
-            append(c);
+        for (int i = 0; i < chars.length; ++i) {
+            append(chars[i]);
         }
     }
 
@@ -405,19 +405,13 @@ final class ParsedDecimal {
             ++size;
         }
         if (decimalPos < 1) {
-            // no whole component;
-            // add decimal point and leading zeros
             size += 2 + Math.abs(decimalPos);
         } else if (decimalPos >= digitCount) {
-            // no fraction component;
-            // add trailing zeros
             size += decimalPos - digitCount;
             if (opts.isIncludeFractionPlaceholder()) {
                 size += 2;
             }
         } else {
-            // whole and fraction components;
-            // add decimal point
             size += 1;
         }
 
@@ -453,7 +447,7 @@ final class ParsedDecimal {
     }
 
     /**
-     * Gets the exponent that would be used when representing this number in scientific
+     * Get sthe exponent that would be used when representing this number in scientific
      * notation (i.e., with a single non-zero digit in front of the decimal point).
      * @return the exponent that would be used when representing this number in scientific
      *      notation
@@ -463,7 +457,7 @@ final class ParsedDecimal {
     }
 
     /**
-     * Tests {@code true} if this value is equal to zero. The sign field is ignored,
+     * Returns {@code true} if this value is equal to zero. The sign field is ignored,
      * meaning that this method will return {@code true} for both {@code +0} and {@code -0}.
      * @return {@code true} if the value is equal to zero
      */
@@ -626,19 +620,15 @@ final class ParsedDecimal {
     }
 
     /**
-     * Returns a string representation of this value in engineering notation. This is similar to {@link #toScientificString(FormatOptions) scientific notation}
+     * Returns a string representation of this value in engineering notation. This
+     * is similar to {@link #toScientificString(FormatOptions) scientific notation}
      * but with the exponent forced to be a multiple of 3, allowing easier alignment with SI prefixes.
-     * <p>
-     * For example:
-     * </p>
-     *
      * <pre>
      * 0 = "0.0"
      * 10 = "10.0"
      * 1e-6 = "1.0E-6"
      * 1e11 = "100.0E9"
      * </pre>
-     *
      * @param opts format options
      * @return value in engineering format
      */
@@ -648,17 +638,12 @@ final class ParsedDecimal {
     }
 
     /**
-     * Returns a string representation of this value with no exponent field.
-     * <p>
-     * For example:
-     * </p>
-     *
+     * Returns a string representation of this value with no exponent field. Ex:
      * <pre>
      * 10 = "10.0"
      * 1e-6 = "0.000001"
      * 1e11 = "100000000000.0"
      * </pre>
-     *
      * @param opts format options
      * @return value in plain format
      */
@@ -680,18 +665,13 @@ final class ParsedDecimal {
     }
 
     /**
-     * Returns a string representation of this value in scientific notation.
-     * <p>
-     * For example:
-     * </p>
-     *
+     * Returns a string representation of this value in scientific notation. Ex:
      * <pre>
      * 0 = "0.0"
      * 10 = "1.0E1"
      * 1e-6 = "1.0E-6"
      * 1e11 = "1.0E11"
      * </pre>
-     *
      * @param opts format options
      * @return value in scientific format
      */

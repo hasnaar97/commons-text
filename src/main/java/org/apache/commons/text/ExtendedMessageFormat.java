@@ -32,12 +32,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.text.matcher.StringMatcherFactory;
 
 /**
- * Extends {@link java.text.MessageFormat} to allow pluggable/additional formatting
+ * Extends {@code java.text.MessageFormat} to allow pluggable/additional formatting
  * options for embedded format elements.  Client code should specify a registry
  * of {@code FormatFactory} instances associated with {@code String}
  * format names.  This registry will be consulted when the format elements are
  * parsed from the message pattern.  In this way custom patterns can be specified,
- * and the formats supported by {@link java.text.MessageFormat} can be overridden
+ * and the formats supported by {@code java.text.MessageFormat} can be overridden
  * at the format and/or format style level (see MessageFormat).  A "format element"
  * embedded in the message pattern is specified (<b>()?</b> signifies optionality):<br>
  * {@code {}<i>argument-number</i><b>(</b>{@code ,}<i>format-name</i><b>
@@ -45,7 +45,7 @@ import org.apache.commons.text.matcher.StringMatcherFactory;
  *
  * <p>
  * <i>format-name</i> and <i>format-style</i> values are trimmed of surrounding whitespace
- * in the manner of {@link java.text.MessageFormat}.  If <i>format-name</i> denotes
+ * in the manner of {@code java.text.MessageFormat}.  If <i>format-name</i> denotes
  * {@code FormatFactory formatFactoryInstance} in {@code registry}, a {@code Format}
  * matching <i>format-name</i> and <i>format-style</i> is requested from
  * {@code formatFactoryInstance}.  If this is successful, the {@code Format}
@@ -58,7 +58,7 @@ import org.apache.commons.text.matcher.StringMatcherFactory;
  * {@code UnsupportedOperationException} if called.
  * </p>
  *
- * <p>Limitations inherited from {@link java.text.MessageFormat}:</p>
+ * <p>Limitations inherited from {@code java.text.MessageFormat}:</p>
  * <ul>
  * <li>When using "choice" subformats, support for nested formatting instructions is limited
  *     to that provided by the base class.</li>
@@ -76,15 +76,9 @@ public class ExtendedMessageFormat extends MessageFormat {
     private static final long serialVersionUID = -2362048321261811743L;
 
     /**
-     * Our initial seed value for calculating hashes.
+     * Hash seed.
      */
     private static final int HASH_SEED = 31;
-
-    /**
-     * The empty string.
-     */
-    private static final String DUMMY_PATTERN = StringUtils.EMPTY;
-
     /**
      * A comma.
      */
@@ -113,7 +107,7 @@ public class ExtendedMessageFormat extends MessageFormat {
     /**
      * Our registry of FormatFactory.
      */
-    private final Map<String, ? extends FormatFactory> registry;
+    private transient Map<String, ? extends FormatFactory> registry;
 
     /**
      * Constructs a new ExtendedMessageFormat for the default locale.
@@ -147,7 +141,7 @@ public class ExtendedMessageFormat extends MessageFormat {
     public ExtendedMessageFormat(final String pattern,
                                  final Locale locale,
                                  final Map<String, ? extends FormatFactory> registry) {
-        super(DUMMY_PATTERN);
+        super(StringUtils.EMPTY);
         setLocale(locale);
         this.registry = registry != null
                 ? Collections.unmodifiableMap(new HashMap<>(registry))
@@ -188,7 +182,9 @@ public class ExtendedMessageFormat extends MessageFormat {
 
         final int start = pos.getIndex();
         final char[] c = pattern.toCharArray();
-        for (int i = pos.getIndex(); i < pattern.length(); i++) {
+        final int patternLength = pattern.length();
+        final int posIndex = pos.getIndex();
+        for (int i = posIndex; i < patternLength; ++i) {
             switch (c[pos.getIndex()]) {
             case QUOTE:
                 next(pos);
@@ -223,13 +219,14 @@ public class ExtendedMessageFormat extends MessageFormat {
         final ParsePosition pos = new ParsePosition(0);
         final char[] c = pattern.toCharArray();
         int fmtCount = 0;
-        while (pos.getIndex() < pattern.length()) {
+        final int patternLength = pattern.length();
+        while (pos.getIndex() < patternLength) {
             switch (c[pos.getIndex()]) {
             case QUOTE:
                 appendQuotedString(pattern, pos, stripCustom);
                 break;
             case START_FE:
-                fmtCount++;
+                ++fmtCount;
                 seekNonWs(pattern, pos);
                 final int start = pos.getIndex();
                 final int index = readArgumentIndex(pattern, next(pos));
@@ -254,8 +251,9 @@ public class ExtendedMessageFormat extends MessageFormat {
                     throw new IllegalArgumentException("The validated expression is false");
                 }
                 if (c[pos.getIndex()] != END_FE) {
-                    throw new IllegalArgumentException(
-                            "Unreadable format element at position " + start);
+                    StringBuilder errorMessage = new StringBuilder();
+                    errorMessage.append("Unreadable format element at position ").append(start);
+                    throw new IllegalArgumentException(errorMessage.toString());
                 }
                 //$FALL-THROUGH$
             default:
@@ -274,9 +272,11 @@ public class ExtendedMessageFormat extends MessageFormat {
                 if (f != null) {
                     origFormats[i] = f;
                 }
-                i++;
+                ++i;
             }
-            super.setFormats(origFormats);
+            Format[] newFormats = new Format[origFormats.length];
+            System.arraycopy(origFormats, 0, newFormats, 0, origFormats.length);
+            super.setFormats(newFormats);
         }
     }
 
@@ -306,7 +306,7 @@ public class ExtendedMessageFormat extends MessageFormat {
         if (obj == null) {
             return false;
         }
-        if (!Objects.equals(getClass(), obj.getClass())) {
+        if (this.getClass() != obj.getClass()) {
           return false;
         }
         final ExtendedMessageFormat rhs = (ExtendedMessageFormat) obj;
@@ -378,18 +378,19 @@ public class ExtendedMessageFormat extends MessageFormat {
         final ParsePosition pos = new ParsePosition(0);
         int fe = -1;
         int depth = 0;
-        while (pos.getIndex() < pattern.length()) {
+        final int patternLength = pattern.length();
+        while (pos.getIndex() < patternLength) {
             final char c = pattern.charAt(pos.getIndex());
             switch (c) {
             case QUOTE:
                 appendQuotedString(pattern, pos, sb);
                 break;
             case START_FE:
-                depth++;
+                ++depth;
                 sb.append(START_FE).append(readArgumentIndex(pattern, next(pos)));
                 // do not look for custom patterns when they are embedded, e.g. in a choice
                 if (depth == 1) {
-                    fe++;
+                    ++fe;
                     final String customPattern = customPatterns.get(fe);
                     if (customPattern != null) {
                         sb.append(START_FMT).append(customPattern);
@@ -430,10 +431,11 @@ public class ExtendedMessageFormat extends MessageFormat {
         seekNonWs(pattern, pos);
         final int text = pos.getIndex();
         int depth = 1;
-        while (pos.getIndex() < pattern.length()) {
+        final int patternLength = pattern.length();
+        while (pos.getIndex() < patternLength) {
             switch (pattern.charAt(pos.getIndex())) {
             case START_FE:
-                depth++;
+                ++depth;
                 next(pos);
                 break;
             case END_FE:
@@ -467,7 +469,9 @@ public class ExtendedMessageFormat extends MessageFormat {
         seekNonWs(pattern, pos);
         final StringBuilder result = new StringBuilder();
         boolean error = false;
-        for (; !error && pos.getIndex() < pattern.length(); next(pos)) {
+        final int patternLength = pattern.length();
+        final int posIndex = pos.getIndex();
+        for (; !error && posIndex < patternLength; next(pos)) {
             char c = pattern.charAt(pos.getIndex());
             if (Character.isWhitespace(c)) {
                 seekNonWs(pattern, pos);
@@ -480,7 +484,7 @@ public class ExtendedMessageFormat extends MessageFormat {
             if ((c == START_FMT || c == END_FE) && result.length() > 0) {
                 try {
                     return Integer.parseInt(result.toString());
-                } catch (final NumberFormatException e) { // NOPMD
+                } catch (NumberFormatException e) { // NOPMD
                     // we've already ensured only digits, so unless something
                     // outlandishly large was specified we should be okay.
                 }

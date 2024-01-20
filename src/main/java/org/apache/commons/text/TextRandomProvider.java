@@ -29,7 +29,7 @@ package org.apache.commons.text;
  * <pre>
  * {@code
  * UniformRandomProvider rng = RandomSource.create(...);
- * RandomStringGenerator gen = RandomStringGenerator.builder()
+ * RandomStringGenerator gen = new RandomStringGenerator.Builder()
  *     .usingRandom(rng::nextInt)
  *     // additional builder calls as needed
  *     .build();

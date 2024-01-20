@@ -40,6 +40,7 @@ public class FuzzyScore {
      */
     private final Locale locale;
 
+
     /**
      * This returns a {@link Locale}-specific {@link FuzzyScore}.
      *
@@ -99,18 +100,19 @@ public class FuzzyScore {
 
         // index of the previously matched character in the term
         int previousMatchingCharacterIndex = Integer.MIN_VALUE;
-
-        for (int queryIndex = 0; queryIndex < queryLowerCase.length(); queryIndex++) {
+        final int queryLowerCaseLength = queryLowerCase.length();
+        final int termLowerCaseLength = termLowerCase.length();
+        for (int queryIndex = 0; queryIndex < queryLowerCaseLength; ++queryIndex) {
             final char queryChar = queryLowerCase.charAt(queryIndex);
 
             boolean termCharacterMatchFound = false;
-            for (; termIndex < termLowerCase.length()
-                    && !termCharacterMatchFound; termIndex++) {
+            for (; termIndex < termLowerCaseLength
+                    && !termCharacterMatchFound; ++termIndex) {
                 final char termChar = termLowerCase.charAt(termIndex);
 
                 if (queryChar == termChar) {
                     // simple character matches result in one point
-                    score++;
+                    ++score;
 
                     // subsequent character matches further improve
                     // the score.

@@ -46,8 +46,10 @@ final class ResourceBundleStringLookup extends AbstractStringLookup {
 
     /**
      * Constructs a blank instance.
+     *
+     * This ctor is not private to allow Mockito spying.
      */
-    private ResourceBundleStringLookup() {
+    ResourceBundleStringLookup() {
         this(null);
     }
 

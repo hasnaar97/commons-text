@@ -16,6 +16,7 @@
  */
 package org.apache.commons.text;
 
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -35,7 +36,7 @@ import org.apache.commons.lang3.Validate;
  *
  * <pre>
  * // Generates a 20 code point string, using only the letters a-z
- * RandomStringGenerator generator = RandomStringGenerator.builder()
+ * RandomStringGenerator generator = new RandomStringGenerator.Builder()
  *     .withinRange('a', 'z').build();
  * String randomLetters = generator.generate(20);
  * </pre>
@@ -43,7 +44,7 @@ import org.apache.commons.lang3.Validate;
  * // Using Apache Commons RNG for randomness
  * UniformRandomProvider rng = RandomSource.create(...);
  * // Generates a 20 code point string, using only the letters a-z
- * RandomStringGenerator generator = RandomStringGenerator.builder()
+ * RandomStringGenerator generator = new RandomStringGenerator.Builder()
  *     .withinRange('a', 'z')
  *     .usingRandom(rng::nextInt) // uses Java 8 syntax
  *     .build();
@@ -85,30 +86,15 @@ public final class RandomStringGenerator {
     public static class Builder implements org.apache.commons.text.Builder<RandomStringGenerator> {
 
         /**
-         * The default maximum code point allowed: {@link Character#MAX_CODE_POINT}
-         * ({@value}).
-         */
-        public static final int DEFAULT_MAXIMUM_CODE_POINT = Character.MAX_CODE_POINT;
-
-        /**
-         * The default string length produced by this builder: {@value}.
-         */
-        public static final int DEFAULT_LENGTH = 0;
-
-        /**
          * The default minimum code point allowed: {@value}.
          */
-        public static final int DEFAULT_MINIMUM_CODE_POINT = 0;
+        private int minimumCodePoint = 0;
 
         /**
-         * The minimum code point allowed.
+         * The maximum code point allowed: {@link Character#MAX_CODE_POINT}
+         * ({@value}).
          */
-        private int minimumCodePoint = DEFAULT_MINIMUM_CODE_POINT;
-
-        /**
-         * The maximum code point allowed.
-         */
-        private int maximumCodePoint = DEFAULT_MAXIMUM_CODE_POINT;
+        private int maximumCodePoint = Character.MAX_CODE_POINT;
 
         /**
          * Filters for code points.
@@ -183,14 +169,13 @@ public final class RandomStringGenerator {
          * @since 1.2
          */
         public Builder selectFrom(final char... chars) {
-            characterList = new ArrayList<>();
-            if (chars != null) {
-                for (final char c : chars) {
-                    characterList.add(c);
-                }
+            characterList = new ArrayList<>(chars.length);
+            for (int i = 0; i < chars.length; ++i) {
+                characterList.add(chars[i]);
             }
             return this;
         }
+
 
         /**
          * Overrides the default source of randomness.  It is highly
@@ -205,7 +190,7 @@ public final class RandomStringGenerator {
          * <pre>
          * {@code
          *     UniformRandomProvider rng = RandomSource.create(...);
-         *     RandomStringGenerator gen = RandomStringGenerator.builder()
+         *     RandomStringGenerator gen = new RandomStringGenerator.Builder()
          *         .usingRandom(rng::nextInt)
          *         // additional builder calls as needed
          *         .build();
@@ -244,22 +229,19 @@ public final class RandomStringGenerator {
          */
         public Builder withinRange(final char[]... pairs) {
             characterList = new ArrayList<>();
-            if (pairs != null) {
-                for (final char[] pair : pairs) {
-                    Validate.isTrue(pair.length == 2, "Each pair must contain minimum and maximum code point");
-                    final int minimumCodePoint = pair[0];
-                    final int maximumCodePoint = pair[1];
-                    Validate.isTrue(minimumCodePoint <= maximumCodePoint, "Minimum code point %d is larger than maximum code point %d", minimumCodePoint,
-                            maximumCodePoint);
-
-                    for (int index = minimumCodePoint; index <= maximumCodePoint; index++) {
-                        characterList.add((char) index);
-                    }
+            for (int i = 0; i < pairs.length; ++i) {
+                char[] pair = pairs[i];
+                Validate.isTrue(pair.length == 2, "Each pair must contain minimum and maximum code point");
+                int minimumCode = pair[0];
+                int maximumCode = pair[1];
+                Validate.isTrue(minimumCode <= maximumCode, "Minimum code point %d is larger than maximum code point %d", minimumCode, maximumCode);
+                for (int index = minimumCode; index <= maximumCode; ++index) {
+                    characterList.add((char) index);
                 }
             }
             return this;
-
         }
+
 
         /**
          * Sets the minimum and maximum code points allowed in the
@@ -292,16 +274,6 @@ public final class RandomStringGenerator {
     }
 
     /**
-     * Constructs a new builder.
-     * @return a new builder.
-     *
-     * @since 1.11.0
-     */
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    /**
      * The smallest allowed code point (inclusive).
      */
     private final int minimumCodePoint;
@@ -320,6 +292,11 @@ public final class RandomStringGenerator {
      * The source of randomness for this generator.
      */
     private final TextRandomProvider random;
+
+    /**
+     * Secure random.
+     */
+    private SecureRandom secureRandom = new SecureRandom();
 
     /**
      * The source of provided characters.
@@ -452,7 +429,7 @@ public final class RandomStringGenerator {
         if (random != null) {
             return random.nextInt(maxInclusive - minInclusive + 1) + minInclusive;
         }
-        return ThreadLocalRandom.current().nextInt(minInclusive, maxInclusive + 1);
+        return secureRandom.nextInt(maxInclusive - minInclusive + 1) + minInclusive;
     }
 
     /**
@@ -467,6 +444,6 @@ public final class RandomStringGenerator {
         if (random != null) {
             return String.valueOf(characterList.get(random.nextInt(listSize))).codePointAt(0);
         }
-        return String.valueOf(characterList.get(ThreadLocalRandom.current().nextInt(0, listSize))).codePointAt(0);
+        return String.valueOf(characterList.get(secureRandom.nextInt(listSize))).codePointAt(0);
     }
 }

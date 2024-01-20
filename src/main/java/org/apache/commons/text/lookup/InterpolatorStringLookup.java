@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
  * Uses the {@link StringLookupFactory default lookups}.
  * </p>
  */
-final class InterpolatorStringLookup extends AbstractStringLookup {
+class InterpolatorStringLookup extends AbstractStringLookup {
 
     /**
      * Defines the singleton for this class.

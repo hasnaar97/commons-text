@@ -273,19 +273,27 @@ public class WordUtils {
      * @param words The array of String words to search for, may be null
      * @return {@code true} if all search words are found, {@code false} otherwise
      */
-    public static boolean containsAllWords(final CharSequence word, final CharSequence... words) {
+    public static boolean containsAllWords(CharSequence word, CharSequence... words) {
         if (StringUtils.isEmpty(word) || ArrayUtils.isEmpty(words)) {
             return false;
         }
-        for (final CharSequence w : words) {
+
+        for (int i = 0; i < words.length; ++i) {
+            CharSequence w = words[i];
             if (StringUtils.isBlank(w)) {
                 return false;
             }
-            final Pattern p = Pattern.compile(".*\\b" + w + "\\b.*");
-            if (!p.matcher(word).matches()) {
+            StringBuilder patternBuilder = new StringBuilder(".*\\b");
+            patternBuilder.append(w);
+            patternBuilder.append("\\b.*");
+            Pattern pattern = Pattern.compile(patternBuilder.toString());
+            boolean matcher = pattern.matcher(word).matches();
+
+            if (!matcher) {
                 return false;
             }
         }
+
         return true;
     }
 
@@ -306,7 +314,7 @@ public class WordUtils {
             return delimiterHashSet;
         }
 
-        for (int index = 0; index < delimiters.length; index++) {
+        for (int index = 0; index < delimiters.length; ++index) {
             delimiterHashSet.add(Character.codePointAt(delimiters, index));
         }
         return delimiterHashSet;
@@ -401,7 +409,8 @@ public class WordUtils {
         if (delimiters == null) {
             return Character.isWhitespace(ch);
         }
-        for (final char delimiter : delimiters) {
+        for (int i = 0; i < delimiters.length; ++i) {
+            char delimiter = delimiters[i];
             if (ch == delimiter) {
                 return true;
             }
@@ -422,7 +431,7 @@ public class WordUtils {
         if (delimiters == null) {
             return Character.isWhitespace(codePoint);
         }
-        for (int index = 0; index < delimiters.length; index++) {
+        for (int index = 0; index < delimiters.length; ++index) {
             final int delimiterCodePoint = Character.codePointAt(delimiters, index);
             if (delimiterCodePoint == codePoint) {
                 return true;
@@ -677,7 +686,7 @@ public class WordUtils {
      *   <td>20</td>
      *   <td>"\n"</td>
      *   <td>true</td>
-     *   <td>"Click here to jump\nto the commons\nwebsite -\nhttps://commons.apach\ne.org"</td>
+     *   <td>"Click here to jump\nto the commons\nwebsite -\nhttp://commons.apach\ne.org"</td>
      *  </tr>
      * </table>
      *
@@ -767,7 +776,7 @@ public class WordUtils {
      *   <td>"\n"</td>
      *   <td>true</td>
      *   <td>" "</td>
-     *   <td>"Click here to jump\nto the commons\nwebsite -\nhttps://commons.apach\ne.org"</td>
+     *   <td>"Click here to jump\nto the commons\nwebsite -\nhttp://commons.apach\ne.org"</td>
      *  </tr>
      *  <tr>
      *   <td>"flammable/inflammable"</td>
@@ -896,5 +905,6 @@ public class WordUtils {
      * instance to operate.</p>
      */
     public WordUtils() {
+        // Intentionally left blank for compatibility reasons.
     }
  }

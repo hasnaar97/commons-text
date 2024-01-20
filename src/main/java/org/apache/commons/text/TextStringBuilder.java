@@ -79,7 +79,8 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
     /**
      * Inner class to allow StrBuilder to operate as a reader.
      */
-    final class TextStringBuilderReader extends Reader {
+    class TextStringBuilderReader extends Reader {
+
 
         /** The last mark position. */
         private int mark;
@@ -156,7 +157,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
         @Override
         public long skip(long n) {
             if (pos + n > TextStringBuilder.this.size()) {
-                n = TextStringBuilder.this.size() - pos;
+                n = TextStringBuilder.this.size() - (long) pos;
             }
             if (n < 0) {
                 return 0;
@@ -169,7 +170,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
     /**
      * Inner class to allow StrBuilder to operate as a tokenizer.
      */
-    final class TextStringBuilderTokenizer extends StringTokenizer {
+    class TextStringBuilderTokenizer extends StringTokenizer {
 
         /**
          * Default constructor.
@@ -200,7 +201,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
     /**
      * Inner class to allow StrBuilder to operate as a writer.
      */
-    final class TextStringBuilderWriter extends Writer {
+    class TextStringBuilderWriter extends Writer {
 
         /**
          * Default constructor.
@@ -251,9 +252,6 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
         }
     }
 
-    /** The space character. */
-    private static final char SPACE = ' ';
-
     /**
      * The extra capacity for new builders.
      */
@@ -276,47 +274,13 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
      */
     private static final long serialVersionUID = 1L;
 
+    /** The space character. */
+    private static final char SPACE = ' ';
+
     /**
      * The size of the string {@code "true"}.
      */
     private static final int TRUE_STRING_SIZE = Boolean.TRUE.toString().length();
-
-    /**
-     * The maximum size buffer to allocate.
-     *
-     * <p>This is set to the same size used in the JDK {@link java.util.ArrayList}:</p>
-     * <blockquote>
-     * Some VMs reserve some header words in an array.
-     * Attempts to allocate larger arrays may result in
-     * OutOfMemoryError: Requested array size exceeds VM limit.
-     * </blockquote>
-     */
-    private static final int MAX_BUFFER_SIZE = Integer.MAX_VALUE - 8;
-
-    /**
-     * Creates a positive capacity at least as large the minimum required capacity.
-     * If the minimum capacity is negative then this throws an OutOfMemoryError as no array
-     * can be allocated.
-     *
-     * @param minCapacity the minimum capacity
-     * @return the capacity
-     * @throws OutOfMemoryError if the {@code minCapacity} is negative
-     */
-    private static int createPositiveCapacity(final int minCapacity) {
-        if (minCapacity < 0) {
-            // overflow
-            throw new OutOfMemoryError("Unable to allocate array size: " + Integer.toUnsignedString(minCapacity));
-        }
-        // This is called when we require buffer expansion to a very big array.
-        // Use the conservative maximum buffer size if possible, otherwise the biggest required.
-        //
-        // Note: In this situation JDK 1.8 java.util.ArrayList returns Integer.MAX_VALUE.
-        // This excludes some VMs that can exceed MAX_BUFFER_SIZE but not allocate a full
-        // Integer.MAX_VALUE length array.
-        // The result is that we may have to allocate an array of this size more than once if
-        // the capacity must be expanded again.
-        return Math.max(minCapacity, MAX_BUFFER_SIZE);
-    }
 
     /**
      * Constructs an instance from a reference to a character array. Changes to the input chars are reflected in this
@@ -428,10 +392,10 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
      */
     public TextStringBuilder append(final boolean value) {
         if (value) {
-            ensureCapacityInternal(size + TRUE_STRING_SIZE);
+            ensureCapacity(size + TRUE_STRING_SIZE);
             appendTrue(size);
         } else {
-            ensureCapacityInternal(size + FALSE_STRING_SIZE);
+            ensureCapacity(size + FALSE_STRING_SIZE);
             appendFalse(size);
         }
         return this;
@@ -446,7 +410,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
     @Override
     public TextStringBuilder append(final char ch) {
         final int len = length();
-        ensureCapacityInternal(len + 1);
+        ensureCapacity(len + 1);
         buffer[size++] = ch;
         return this;
     }
@@ -464,7 +428,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
         final int strLen = chars.length;
         if (strLen > 0) {
             final int len = length();
-            ensureCapacityInternal(len + strLen);
+            ensureCapacity(len + strLen);
             System.arraycopy(chars, 0, buffer, len, strLen);
             size += strLen;
         }
@@ -495,7 +459,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
         }
         if (length > 0) {
             final int len = length();
-            ensureCapacityInternal(len + length);
+            ensureCapacity(len + length);
             System.arraycopy(chars, startIndex, buffer, len, length);
             size += length;
         }
@@ -533,7 +497,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
                 throw new StringIndexOutOfBoundsException("length must be valid");
             }
             final int len = length();
-            ensureCapacityInternal(len + length);
+            ensureCapacity(len + length);
             System.arraycopy(buf.array(), buf.arrayOffset() + buf.position() + startIndex, buffer, len, length);
             size += length;
         } else {
@@ -680,7 +644,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
         }
         if (length > 0) {
             final int len = length();
-            ensureCapacityInternal(len + length);
+            ensureCapacity(len + length);
             str.getChars(startIndex, startIndex + length, buffer, len);
             size += length;
         }
@@ -729,7 +693,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
         }
         if (length > 0) {
             final int len = length();
-            ensureCapacityInternal(len + length);
+            ensureCapacity(len + length);
             str.getChars(startIndex, startIndex + length, buffer, len);
             size += length;
         }
@@ -766,7 +730,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
         }
         if (length > 0) {
             final int len = length();
-            ensureCapacityInternal(len + length);
+            ensureCapacity(len + length);
             str.getChars(startIndex, startIndex + length, buffer, len);
             size += length;
         }
@@ -803,7 +767,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
         }
         if (length > 0) {
             final int len = length();
-            ensureCapacityInternal(len + length);
+            ensureCapacity(len + length);
             str.getChars(startIndex, startIndex + length, buffer, len);
             size += length;
         }
@@ -853,9 +817,11 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
          * vouch for itself whether its use of 'array' is safe.
          */
         if (array != null && array.length > 0) {
-            for (final Object element : array) {
+            for (int i = 0; i < array.length; ++i) {
+                Object element = array[i];
                 append(element);
             }
+
         }
         return this;
     }
@@ -895,7 +861,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
      */
     public TextStringBuilder appendFixedWidthPadLeft(final Object obj, final int width, final char padChar) {
         if (width > 0) {
-            ensureCapacityInternal(size + width);
+            ensureCapacity(size + width);
             String str = obj == null ? getNullText() : obj.toString();
             if (str == null) {
                 str = StringUtils.EMPTY;
@@ -905,7 +871,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
                 str.getChars(strLen - width, strLen, buffer, size);
             } else {
                 final int padLen = width - strLen;
-                for (int i = 0; i < padLen; i++) {
+                for (int i = 0; i < padLen; ++i) {
                     buffer[size + i] = padChar;
                 }
                 str.getChars(0, strLen, buffer, size + padLen);
@@ -940,7 +906,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
      */
     public TextStringBuilder appendFixedWidthPadRight(final Object obj, final int width, final char padChar) {
         if (width > 0) {
-            ensureCapacityInternal(size + width);
+            ensureCapacity(size + width);
             String str = obj == null ? getNullText() : obj.toString();
             if (str == null) {
                 str = StringUtils.EMPTY;
@@ -951,7 +917,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
             } else {
                 final int padLen = width - strLen;
                 str.getChars(0, strLen, buffer, size);
-                for (int i = 0; i < padLen; i++) {
+                for (int i = 0; i < padLen; ++i) {
                     buffer[size + strLen + i] = padChar;
                 }
             }
@@ -1199,8 +1165,8 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
      */
     public TextStringBuilder appendPadding(final int length, final char padChar) {
         if (length >= 0) {
-            ensureCapacityInternal(size + length);
-            for (int i = 0; i < length; i++) {
+            ensureCapacity(size + length);
+            for (int i = 0; i < length; ++i) {
                 buffer[size++] = padChar;
             }
         }
@@ -1261,7 +1227,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
      * </p>
      *
      * <pre>
-     * for (int i = 0; i &lt; list.size(); i++) {
+     * for (int i = 0; i &lt; list.size(); ++i) {
      *     appendSeparator(",", i);
      *     append(list.get(i));
      * }
@@ -1315,7 +1281,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
      * </p>
      *
      * <pre>
-     * for (int i = 0; i &lt; list.size(); i++) {
+     * for (int i = 0; i &lt; list.size(); ++i) {
      *     appendSeparator(",", i);
      *     append(list.get(i));
      * }
@@ -1337,22 +1303,21 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
     }
 
     /**
-     * Appends one of both separators to the StrBuilder. If the builder is currently empty, it will append the
-     * defaultIfEmpty-separator, otherwise it will append the standard-separator.
-     * <p>
+     * Appends one of both separators to the StrBuilder. If the builder is currently empty it will append the
+     * defaultIfEmpty-separator Otherwise it will append the standard-separator
+     *
      * Appending a null separator will have no effect. The separator is appended using {@link #append(String)}.
-     * </p>
      * <p>
      * This method is for example useful for constructing queries
      * </p>
      *
      * <pre>
      * StrBuilder whereClause = new StrBuilder();
-     * if (searchCommand.getPriority() != null) {
+     * if(searchCommand.getPriority() != null) {
      *  whereClause.appendSeparator(" and", " where");
      *  whereClause.append(" priority = ?")
      * }
-     * if (searchCommand.getComponent() != null) {
+     * if(searchCommand.getComponent() != null) {
      *  whereClause.appendSeparator(" and", " where");
      *  whereClause.append(" component = ?")
      * }
@@ -1453,7 +1418,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
         if (array != null && array.length > 0) {
             final String sep = Objects.toString(separator, StringUtils.EMPTY);
             append(array[0]);
-            for (int i = 1; i < array.length; i++) {
+            for (int i = 1; i < array.length; ++i) {
                 append(sep);
                 append(array[i]);
             }
@@ -1608,7 +1573,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
      */
     public boolean contains(final char ch) {
         final char[] thisBuf = buffer;
-        for (int i = 0; i < this.size; i++) {
+        for (int i = 0; i < this.size; ++i) {
             if (thisBuf[i] == ch) {
                 return true;
             }
@@ -1664,7 +1629,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
      * @return this, to enable chaining
      */
     public TextStringBuilder deleteAll(final char ch) {
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < size; ++i) {
             if (buffer[i] == ch) {
                 final int start = i;
                 while (++i < size) {
@@ -1734,7 +1699,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
      * @return this, to enable chaining
      */
     public TextStringBuilder deleteFirst(final char ch) {
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < size; ++i) {
             if (buffer[i] == ch) {
                 deleteImpl(i, i + 1, 1);
                 break;
@@ -1847,7 +1812,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
             return false;
         }
         int pos = size - len;
-        for (int i = 0; i < len; i++, pos++) {
+        for (int i = 0; i < len; ++i, ++pos) {
             if (buffer[pos] != str.charAt(i)) {
                 return false;
             }
@@ -1858,42 +1823,15 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
     /**
      * Tests the capacity and ensures that it is at least the size specified.
      *
-     * <p>
-     * Note: This method can be used to minimise memory reallocations during
-     * repeated addition of values by pre-allocating the character buffer.
-     * The method ignores a negative {@code capacity} argument.
-     * </p>
-     *
      * @param capacity the capacity to ensure
      * @return this, to enable chaining
-     * @throws OutOfMemoryError if the capacity cannot be allocated
      */
     public TextStringBuilder ensureCapacity(final int capacity) {
-        if (capacity > 0) {
-            ensureCapacityInternal(capacity);
+        // checks for overflow
+        if (capacity > 0 && capacity - buffer.length > 0) {
+            reallocate(capacity);
         }
         return this;
-    }
-
-    /**
-     * Ensures that the buffer is at least the size specified. The {@code capacity} argument
-     * is treated as an unsigned integer.
-     *
-     * <p>
-     * This method will raise an {@link OutOfMemoryError} if the capacity is too large
-     * for an array, or cannot be allocated.
-     * </p>
-     *
-     * @param capacity the capacity to ensure
-     * @throws OutOfMemoryError if the capacity cannot be allocated
-     */
-    private void ensureCapacityInternal(final int capacity) {
-        // Check for overflow of the current buffer.
-        // Assumes capacity is an unsigned integer up to Integer.MAX_VALUE * 2
-        // (the largest possible addition of two maximum length arrays).
-        if (capacity - buffer.length > 0) {
-            resizeBuffer(capacity);
-        }
     }
 
     /**
@@ -2032,7 +1970,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
         // no allocation
         final char[] buf = buffer;
         int result = 0;
-        for (int i = 0; i < size; i++) {
+        for (int i = 0; i < size; ++i) {
             result = 31 * result + buf[i];
         }
         return result;
@@ -2061,7 +1999,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
             return StringUtils.INDEX_NOT_FOUND;
         }
         final char[] thisBuf = buffer;
-        for (int i = startIndex; i < size; i++) {
+        for (int i = startIndex; i < size; ++i) {
             if (thisBuf[i] == ch) {
                 return i;
             }
@@ -2110,8 +2048,8 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
         }
         final char[] thisBuf = buffer;
         final int len = size - strLen + 1;
-        outer: for (int i = startIndex; i < len; i++) {
-            for (int j = 0; j < strLen; j++) {
+        outer: for (int i = startIndex; i < len; ++i) {
+            for (int j = 0; j < strLen; ++j) {
                 if (str.charAt(j) != thisBuf[i + j]) {
                     continue outer;
                 }
@@ -2153,7 +2091,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
         }
         final int len = size;
         final char[] buf = buffer;
-        for (int i = startIndex; i < len; i++) {
+        for (int i = startIndex; i < len; ++i) {
             if (matcher.isMatch(buf, i, startIndex, len) > 0) {
                 return i;
             }
@@ -2172,11 +2110,11 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
     public TextStringBuilder insert(final int index, final boolean value) {
         validateIndex(index);
         if (value) {
-            ensureCapacityInternal(size + TRUE_STRING_SIZE);
+            ensureCapacity(size + TRUE_STRING_SIZE);
             System.arraycopy(buffer, index, buffer, index + TRUE_STRING_SIZE, size - index);
             appendTrue(index);
         } else {
-            ensureCapacityInternal(size + FALSE_STRING_SIZE);
+            ensureCapacity(size + FALSE_STRING_SIZE);
             System.arraycopy(buffer, index, buffer, index + FALSE_STRING_SIZE, size - index);
             appendFalse(index);
         }
@@ -2193,10 +2131,10 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
      */
     public TextStringBuilder insert(final int index, final char value) {
         validateIndex(index);
-        ensureCapacityInternal(size + 1);
+        ensureCapacity(size + 1);
         System.arraycopy(buffer, index, buffer, index + 1, size - index);
         buffer[index] = value;
-        size++;
+        ++size;
         return this;
     }
 
@@ -2215,7 +2153,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
         }
         final int len = chars.length;
         if (len > 0) {
-            ensureCapacityInternal(size + len);
+            ensureCapacity(size + len);
             System.arraycopy(buffer, index, buffer, index + len, size - index);
             System.arraycopy(chars, 0, buffer, index, len);
             size += len;
@@ -2245,7 +2183,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
             throw new StringIndexOutOfBoundsException("Invalid length: " + length);
         }
         if (length > 0) {
-            ensureCapacityInternal(size + length);
+            ensureCapacity(size + length);
             System.arraycopy(buffer, index, buffer, index + length, size - index);
             System.arraycopy(chars, offset, buffer, index, length);
             size += length;
@@ -2334,7 +2272,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
             final int strLen = str.length();
             if (strLen > 0) {
                 final int newSize = size + strLen;
-                ensureCapacityInternal(newSize);
+                ensureCapacity(newSize);
                 System.arraycopy(buffer, index, buffer, index + strLen, size - index);
                 size = newSize;
                 str.getChars(0, strLen, buffer, index);
@@ -2444,7 +2382,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
             }
 
             outer: for (int i = startIndex - strLen + 1; i >= 0; i--) {
-                for (int j = 0; j < strLen; j++) {
+                for (int j = 0; j < strLen; ++j) {
                     if (str.charAt(j) != buffer[i + j]) {
                         continue outer;
                     }
@@ -2579,7 +2517,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
     public int readFrom(final CharBuffer charBuffer) {
         final int oldSize = size;
         final int remaining = charBuffer.remaining();
-        ensureCapacityInternal(size + remaining);
+        ensureCapacity(size + remaining);
         charBuffer.get(buffer, size, remaining);
         size += remaining;
         return size - oldSize;
@@ -2604,7 +2542,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
         }
         final int oldSize = size;
         while (true) {
-            ensureCapacityInternal(size + 1);
+            ensureCapacity(size + 1);
             final CharBuffer buf = CharBuffer.wrap(buffer, size, buffer.length - size);
             final int read = readable.read(buf);
             if (read == EOS) {
@@ -2628,14 +2566,14 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
      */
     public int readFrom(final Reader reader) throws IOException {
         final int oldSize = size;
-        ensureCapacityInternal(size + 1);
+        ensureCapacity(size + 1);
         int readCount = reader.read(buffer, size, buffer.length - size);
         if (readCount == EOS) {
             return EOS;
         }
         do {
             size += readCount;
-            ensureCapacityInternal(size + 1);
+            ensureCapacity(size + 1);
             readCount = reader.read(buffer, size, buffer.length - size);
         } while (readCount != EOS);
         return size - oldSize;
@@ -2658,7 +2596,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
             return 0;
         }
         final int oldSize = size;
-        ensureCapacityInternal(size + count);
+        ensureCapacity(size + count);
         int target = count;
         int readCount = reader.read(buffer, size, target);
         if (readCount == EOS) {
@@ -2679,7 +2617,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
      */
     private void reallocate(final int newLength) {
         this.buffer = Arrays.copyOf(buffer, newLength);
-        this.reallocations++;
+        ++this.reallocations;
     }
 
     /**
@@ -2729,7 +2667,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
      */
     public TextStringBuilder replaceAll(final char search, final char replace) {
         if (search != replace) {
-            for (int i = 0; i < size; i++) {
+            for (int i = 0; i < size; ++i) {
                 if (buffer[i] == search) {
                     buffer[i] = replace;
                 }
@@ -2782,7 +2720,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
      */
     public TextStringBuilder replaceFirst(final char search, final char replace) {
         if (search != replace) {
-            for (int i = 0; i < size; i++) {
+            for (int i = 0; i < size; ++i) {
                 if (buffer[i] == search) {
                     buffer[i] = replace;
                     break;
@@ -2840,7 +2778,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
         final int insertLen) {
         final int newSize = size - removeLen + insertLen;
         if (insertLen != removeLen) {
-            ensureCapacityInternal(newSize);
+            ensureCapacity(newSize);
             System.arraycopy(buffer, endIndex, buffer, startIndex + insertLen, size - endIndex);
             size = newSize;
         }
@@ -2870,7 +2808,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
             return this;
         }
         final int replaceLen = replaceStr == null ? 0 : replaceStr.length();
-        for (int i = from; i < to && replaceCount != 0; i++) {
+        for (int i = from; i < to && replaceCount != 0; ++i) {
             final char[] buf = buffer;
             final int removeLen = matcher.isMatch(buf, i, from, to);
             if (removeLen > 0) {
@@ -2886,25 +2824,6 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
     }
 
     /**
-     * Resizes the buffer to at least the size specified.
-     *
-     * @param minCapacity the minimum required capacity
-     * @throws OutOfMemoryError if the {@code minCapacity} is negative
-     */
-    private void resizeBuffer(final int minCapacity) {
-        // Overflow-conscious code treats the min and new capacity as unsigned.
-        final int oldCapacity = buffer.length;
-        int newCapacity = oldCapacity * 2;
-        if (Integer.compareUnsigned(newCapacity, minCapacity) < 0) {
-            newCapacity = minCapacity;
-        }
-        if (Integer.compareUnsigned(newCapacity, MAX_BUFFER_SIZE) > 0) {
-            newCapacity = createPositiveCapacity(minCapacity);
-        }
-        reallocate(newCapacity);
-    }
-
-    /**
      * Reverses the string builder placing each character in the opposite index.
      *
      * @return this, to enable chaining
@@ -2916,7 +2835,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
 
         final int half = size / 2;
         final char[] buf = buffer;
-        for (int leftIdx = 0, rightIdx = size - 1; leftIdx < half; leftIdx++, rightIdx--) {
+        for (int leftIdx = 0, rightIdx = size - 1; leftIdx < half; ++leftIdx, rightIdx--) {
             final char swap = buf[leftIdx];
             buf[leftIdx] = buf[rightIdx];
             buf[rightIdx] = swap;
@@ -2989,7 +2908,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
         if (length < size) {
             size = length;
         } else if (length > size) {
-            ensureCapacityInternal(length);
+            ensureCapacity(length);
             final int oldEnd = size;
             size = length;
             Arrays.fill(buffer, oldEnd, length, '\0');
@@ -3054,7 +2973,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
         if (len > size) {
             return false;
         }
-        for (int i = 0; i < len; i++) {
+        for (int i = 0; i < len; ++i) {
             if (buffer[i] != str.charAt(i)) {
                 return false;
             }
@@ -3168,6 +3087,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
      * @return this, to enable chaining
      */
     public TextStringBuilder trim() {
+
         if (size == 0) {
             return this;
         }
@@ -3175,7 +3095,7 @@ public class TextStringBuilder implements CharSequence, Appendable, Serializable
         final char[] buf = buffer;
         int pos = 0;
         while (pos < len && buf[pos] <= SPACE) {
-            pos++;
+            ++pos;
         }
         while (pos < len && buf[len - 1] <= SPACE) {
             len--;

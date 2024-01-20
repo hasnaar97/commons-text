@@ -70,10 +70,10 @@ public class NumericEntityEscaper extends CodePointTranslator {
         return new NumericEntityEscaper(codePointLow, codePointHigh, false);
     }
 
-    /** Whether to escape between the boundaries or outside them. */
+    /** whether to escape between the boundaries or outside them. */
     private final boolean between;
 
-    /** Range from lowest code point to highest code point. */
+    /** range from lowest code point to highest code point. */
     private final Range<Integer> range;
 
     /**
@@ -94,7 +94,7 @@ public class NumericEntityEscaper extends CodePointTranslator {
      * @param between whether to escape between the boundaries or outside them
      */
     private NumericEntityEscaper(final int below, final int above, final boolean between) {
-        this.range = Range.of(below, above);
+        this.range = Range.between(below, above);
         this.between = between;
     }
 

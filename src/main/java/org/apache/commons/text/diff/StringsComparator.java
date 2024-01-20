@@ -56,7 +56,7 @@ public class StringsComparator {
      * This class is a simple placeholder to hold the end part of a path
      * under construction in a {@link StringsComparator StringsComparator}.
      */
-    private static final class Snake {
+    private static class Snake {
 
         /** Start index. */
         private final int start;
@@ -171,12 +171,14 @@ public class StringsComparator {
                     script.append(new KeepCommand<>(left.charAt(i)));
                     ++i;
                     ++j;
-                } else if (end1 - start1 > end2 - start2) {
-                    script.append(new DeleteCommand<>(left.charAt(i)));
-                    ++i;
                 } else {
-                    script.append(new InsertCommand<>(right.charAt(j)));
-                    ++j;
+                    if (end1 - start1 > end2 - start2) {
+                        script.append(new DeleteCommand<>(left.charAt(i)));
+                        ++i;
+                    } else {
+                        script.append(new InsertCommand<>(right.charAt(j)));
+                        ++j;
+                    }
                 }
             }
 
@@ -185,7 +187,9 @@ public class StringsComparator {
             buildScript(start1, middle.getStart(),
                         start2, middle.getStart() - middle.getDiag(),
                         script);
-            for (int i = middle.getStart(); i < middle.getEnd(); ++i) {
+            final int middleGetEnd = middle.getEnd();
+            final int middleGetStart = middle.getStart();
+            for (int i = middleGetStart; i < middleGetEnd; ++i) {
                 script.append(new KeepCommand<>(left.charAt(i)));
             }
             buildScript(middle.getEnd(), end1,

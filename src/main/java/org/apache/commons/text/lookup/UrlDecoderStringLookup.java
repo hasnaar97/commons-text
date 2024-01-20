@@ -36,9 +36,9 @@ final class UrlDecoderStringLookup extends AbstractStringLookup {
     static final UrlDecoderStringLookup INSTANCE = new UrlDecoderStringLookup();
 
     /**
-     * Constructs a new instance.
+     * This ctor is not private to allow Mockito spying.
      */
-    private UrlDecoderStringLookup() {
+    UrlDecoderStringLookup() {
         // empty
     }
 
